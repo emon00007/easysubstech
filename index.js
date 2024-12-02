@@ -36,7 +36,7 @@ async function run() {
     // Database and Collections
     const database = client.db("youtubeBoostingDB");
     const usersCollection = database.collection("users");
-
+    const servicesCollection = database.collection("services");
     // Routes
 
     // Home Route
@@ -86,6 +86,42 @@ async function run() {
     console.error("Error running server:", error);
   }
 }
+
+
+
+// Add Service
+app.post("/services", async (req, res) => {
+  const service = req.body; // Expecting the form data from the frontend
+  try {
+    const result = await servicesCollection.insertOne(service);
+    res.status(201).send(result);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+// Get All Services
+// app.get("/services", async (req, res) => {
+//   try {
+//     const services = await servicesCollection.find({}).toArray();
+//     res.status(200).send(services);
+//   } catch (error) {
+//     res.status(500).send({ error: error.message });
+//   }
+// });
+
+// Get a Single Service by ID
+// app.get("/services/:id", async (req, res) => {
+//   const { id } = req.params;
+//   const { ObjectId } = require("mongodb"); // Ensure this is imported
+//   try {
+//     const service = await servicesCollection.findOne({ _id: new ObjectId(id) });
+//     res.status(200).send(service);
+//   } catch (error) {
+//     res.status(500).send({ error: error.message });
+//   }
+// });
+
 
 // Start the Application
 run().catch(console.dir);
