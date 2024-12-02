@@ -12,7 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 // MongoDB URI
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.x8jkuyh.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.lcvsatz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Stripe Initialization
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -44,7 +44,7 @@ async function run() {
       res.send("Welcome to YouTube Boosting!");
     });
 
-    // Add User
+    // Add User Route
     app.post("/users", async (req, res) => {
       const user = req.body;
       try {
@@ -55,7 +55,7 @@ async function run() {
       }
     });
 
-    // Get Users by Role
+    // Get Users by Role Route
     app.get("/users/:role", async (req, res) => {
       const { role } = req.params;
       try {
@@ -66,7 +66,7 @@ async function run() {
       }
     });
 
-    // Create Payment Intent
+    // Create Payment Intent Route
     app.post("/create-payment-intent", async (req, res) => {
       const { amount } = req.body;
 
@@ -81,6 +81,7 @@ async function run() {
         res.status(500).send({ error: error.message });
       }
     });
+
   } catch (error) {
     console.error("Error running server:", error);
   }
