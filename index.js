@@ -45,15 +45,44 @@ async function run() {
     });
 
     // Add User
-    app.post("/users", async (req, res) => {
-      const user = req.body;
-      try {
-        const result = await usersCollection.insertOne(user);
-        res.status(201).send(result);
-      } catch (error) {
-        res.status(500).send({ error: error.message });
-      }
+    app.post('/users', async (req, res) => {
+        const user = req.body;
+        const query = { email: user.email }
+        const existingUser = await usersCollection.findOne(query)
+        if (existingUser) {
+            return res.send({ massage: 'user Already Exists', insertedId: null })
+        }
+        const result = await  usersCollection.insertOne(user);
+        res.send(result);
     });
+
+    app.post("/services", async (req, res) => {
+        const service = req.body; // Expecting the form data from the frontend
+        try {
+          const result = await servicesCollection.insertOne(service);
+
+          res.status(201).send(result);
+        } catch (error) {
+          res.status(500).send({ error: error.message });
+        }
+      });
+
+      app.post("/services", (req, res) => {
+        const service = req.body;
+        // Mock database insertion
+        console.log("Service received:", service);
+        res.status(201).json({ message: "Service added successfully!" });
+      });
+
+      // Get All Services
+app.get("/services", async (req, res) => {
+  try {
+    const services = await servicesCollection.find({}).toArray();
+    res.status(200).send(services);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
 
     // Get Users by Role
     app.get("/users/:role", async (req, res) => {
@@ -89,37 +118,21 @@ async function run() {
 
 
 // Add Service
-app.post("/services", async (req, res) => {
-  const service = req.body; // Expecting the form data from the frontend
+
+
+
+
+// Get a Single Service by ID
+app.get("/services/:id", async (req, res) => {
+  const { id } = req.params;
+  const { ObjectId } = require("mongodb"); // Ensure this is imported
   try {
-    const result = await servicesCollection.insertOne(service);
-    res.status(201).send(result);
+    const service = await servicesCollection.findOne({ _id: new ObjectId(id) });
+    res.status(200).send(service);
   } catch (error) {
     res.status(500).send({ error: error.message });
   }
 });
-
-// Get All Services
-// app.get("/services", async (req, res) => {
-//   try {
-//     const services = await servicesCollection.find({}).toArray();
-//     res.status(200).send(services);
-//   } catch (error) {
-//     res.status(500).send({ error: error.message });
-//   }
-// });
-
-// Get a Single Service by ID
-// app.get("/services/:id", async (req, res) => {
-//   const { id } = req.params;
-//   const { ObjectId } = require("mongodb"); // Ensure this is imported
-//   try {
-//     const service = await servicesCollection.findOne({ _id: new ObjectId(id) });
-//     res.status(200).send(service);
-//   } catch (error) {
-//     res.status(500).send({ error: error.message });
-//   }
-// });
 
 
 // Start the Application
