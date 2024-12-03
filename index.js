@@ -55,24 +55,33 @@ async function run() {
         const result = await  usersCollection.insertOne(user);
         res.send(result);
     });
+    app.get("/users", async (req, res) => {
+      try {
+        const users = await usersCollection.find({}).toArray();
+        res.status(200).send(users);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
+    });
+    
+
 
     app.post("/services", async (req, res) => {
-        const service = req.body; // Expecting the form data from the frontend
+        console.log("Received data:", req.body);
         try {
-          const result = await servicesCollection.insertOne(service);
-
-          res.status(201).send(result);
+            const result = await servicesCollection.insertOne(req.body);
+            res.status(201).send(result);
         } catch (error) {
-          res.status(500).send({ error: error.message });
+            console.error("Error inserting data:", error.message);
+            res.status(500).send({ error: error.message });
         }
-      });
-
-      app.post("/services", (req, res) => {
-        const service = req.body;
-        // Mock database insertion
-        console.log("Service received:", service);
-        res.status(201).json({ message: "Service added successfully!" });
-      });
+    });
+    //   app.post("/services", (req, res) => {
+    //     const service = req.body;
+    //     // Mock database insertion
+    //     console.log("Service received:", service);
+    //     res.status(201).json({ message: "Service added successfully!" });
+    //   });
 
       // Get All Services
 app.get("/services", async (req, res) => {
