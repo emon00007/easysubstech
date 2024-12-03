@@ -55,6 +55,16 @@ async function run() {
         const result = await  usersCollection.insertOne(user);
         res.send(result);
     });
+    app.get("/users", async (req, res) => {
+      try {
+        const users = await usersCollection.find({}).toArray();
+        res.status(200).send(users);
+      } catch (error) {
+        res.status(500).send({ error: error.message });
+      }
+    });
+    
+
 
     app.post("/services", async (req, res) => {
         console.log("Received data:", req.body);
