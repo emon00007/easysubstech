@@ -41,7 +41,7 @@ const transporter = nodemailer.createTransport({
 async function run() {
   try {
     // Connect to MongoDB
-    await client.connect();
+    
     console.log("Successfully connected to MongoDB!");
 
     // Database and Collections
