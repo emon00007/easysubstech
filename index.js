@@ -31,13 +31,13 @@ const client = new MongoClient(uri, {
 // Run Function
 async function run() {
   try {
-    
     console.log("Successfully connected to MongoDB!");
 
     // Database and Collections
     const database = client.db("youtubeBoostingDB");
     const usersCollection = database.collection("users");
     const servicesCollection = database.collection("services");
+    const paymentsCollection = database.collection("payments");
 
     // Routes
 
@@ -112,27 +112,57 @@ async function run() {
 
     // Create Payment Intent
     app.post("/create-payment-intent", async (req, res) => {
-      const { amount } = req.body;
+      const { fees } = req.body;
+
       try {
         const paymentIntent = await stripe.paymentIntents.create({
-          amount,
+          amount: Math.round(fees * 100), // Stripe requires the amount in cents
           currency: "usd",
+          payment_method_types: ["card"],
         });
+
         res.send({ clientSecret: paymentIntent.client_secret });
       } catch (error) {
-        res.status(500).send({ error: error.message });
+        console.error("Error creating payment intent:", error);
+        res.status(500).send({ error: "Failed to create payment intent" });
       }
     });
 
+    // Save payment details
+    app.post("/payments", async (req, res) => {
+      const paymentDetails = req.body;
+
+      try {
+        const result = await paymentsCollection.insertOne(paymentDetails);
+        res.send({ paymentResult: result });
+      } catch (error) {
+        console.error("Error saving payment:", error);
+        res.status(500).send({ error: "Failed to save payment" });
+      }
+    });
+
+    // Retrieve user data (replace with your logic)
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+
+      try {
+        // Assuming you fetch user data from your DB
+        const userData = await usersCollection.find({ email }).toArray();
+        res.send(userData);
+      } catch (error) {
+        console.error("Error retrieving user data:", error);
+        res.status(500).send({ error: "Failed to retrieve user data" });
+      }
+    });
+    
   } finally {
-    // Optionally close the client if you want to disconnect after handling requests
+   
   }
 }
 
-// Start the Application
+
 run().catch(console.dir);
 
-// Start the Server
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
