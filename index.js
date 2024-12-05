@@ -1,8 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
-const crypto = require("crypto");
-const nodemailer = require("nodemailer");
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const Stripe = require("stripe");
@@ -30,25 +28,10 @@ const client = new MongoClient(uri, {
   },
 });
 
-// In-memory storage for OTPs (use a database like Redis for production)
-const otpStore = {};
-
-// Email Configuration
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-// Helper Function to Generate OTP
-const generateOtp = () => crypto.randomInt(100000, 999999).toString();
-
 // Run Function
 async function run() {
   try {
-  
+    
     console.log("Successfully connected to MongoDB!");
 
     // Database and Collections
@@ -141,61 +124,8 @@ async function run() {
       }
     });
 
-    // OTP Routes
-
-    // Send OTP
-    app.post("/send-otp", (req, res) => {
-      const { email } = req.body;
-
-      if (!email) {
-        return res.status(400).json({ message: "Email is required" });
-      }
-
-      const otp = generateOtp();
-      otpStore[email] = { otp, expiresAt: Date.now() + 5 * 60 * 1000 };
-
-      const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "Your OTP for Signup",
-        text: `Your OTP is ${otp}. It will expire in 5 minutes.`,
-      };
-
-      transporter.sendMail(mailOptions, (err) => {
-        if (err) {
-          return res.status(500).json({ message: "Failed to send OTP" });
-        }
-        res.status(200).json({ message: "OTP sent successfully" });
-      });
-    });
-
-    // Verify OTP
-    app.post("/verify-otp", (req, res) => {
-      const { email, otp } = req.body;
-
-      if (!email || !otp) {
-        return res.status(400).json({ message: "Email and OTP are required" });
-      }
-
-      const record = otpStore[email];
-      if (!record) {
-        return res.status(400).json({ message: "No OTP found for this email" });
-      }
-
-      if (Date.now() > record.expiresAt) {
-        return res.status(400).json({ message: "OTP has expired" });
-      }
-
-      if (record.otp !== otp) {
-        return res.status(400).json({ message: "Invalid OTP" });
-      }
-
-      delete otpStore[email];
-      res.status(200).json({ message: "OTP verified successfully" });
-    });
-
-  } catch (error) {
-    console.error("Error running server:", error);
+  } finally {
+    // Optionally close the client if you want to disconnect after handling requests
   }
 }
 
