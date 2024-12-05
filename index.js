@@ -48,7 +48,7 @@ const generateOtp = () => crypto.randomInt(100000, 999999).toString();
 // Run Function
 async function run() {
   try {
-    await client.connect();
+  
     console.log("Successfully connected to MongoDB!");
 
     // Database and Collections
